@@ -415,7 +415,7 @@ export class ACLAdmin {
         authorizationEnabled: false,
         aclSupported: false,
         message: 'Kafka authorization is not enabled or ACLs are not supported',
-        error: error.message
+        error: error instanceof Error ? error.message : String(error)
       };
     }
   }

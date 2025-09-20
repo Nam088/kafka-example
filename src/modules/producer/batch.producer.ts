@@ -68,7 +68,7 @@ export class BatchProducer {
    * Add message to batch buffer
    */
   async addMessage(topic: string, message: any, key?: string): Promise<void> {
-    this.messageBuffer.push({ topic, key, value: message });
+    this.messageBuffer.push({ topic, key: key || undefined, value: message });
 
     // Auto-flush if batch size reached
     if (this.messageBuffer.length >= this.batchSize) {
@@ -226,7 +226,7 @@ export class BatchProducer {
       if (!groups[topic]) {
         groups[topic] = [];
       }
-      groups[topic].push({ key, value });
+      groups[topic].push({ key: key || undefined, value });
       return groups;
     }, {} as Record<string, Array<{ key?: string; value: any }>>);
   }

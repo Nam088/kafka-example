@@ -127,7 +127,7 @@ export class StreamingConsumer {
               topic: batch.topic,
               partition: batch.partition,
               message
-            });
+            } as any);
 
             resolveOffset(message.offset);
             await heartbeat();
@@ -377,7 +377,7 @@ export class StreamingConsumer {
    * Detect anomalies
    */
   private detectAnomalies(messages: any[]): any[] {
-    const anomalies = [];
+    const anomalies: any[] = [];
 
     // Detect unusual message sizes
     const messageSizes = messages.map(msg => JSON.stringify(msg).length);

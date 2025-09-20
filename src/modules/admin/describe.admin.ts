@@ -65,7 +65,7 @@ export class DescribeAdmin {
           nodeId: broker.nodeId,
           host: broker.host,
           port: broker.port,
-          rack: broker.rack
+          rack: (broker as any).rack
         }))
       };
 
@@ -223,10 +223,9 @@ export class DescribeAdmin {
     }
 
     try {
-      const offsetsData = await this.admin.fetchOffsets({
-        groupId,
-        topics: topics || undefined
-      });
+      const offsetsData = await this.admin.fetchOffsets(
+        topics ? { groupId, topics } : { groupId }
+      );
 
       logger.info('Consumer group offsets retrieved', {
         groupId,
@@ -262,15 +261,15 @@ export class DescribeAdmin {
       // Get consumer group offsets
       const consumerOffsets = await this.getConsumerGroupOffsets(groupId, [topicName]);
       
-      const topicConsumerData = consumerOffsets.find(t => t.topic === topicName);
+      const topicConsumerData = consumerOffsets.find((t: any) => t.topic === topicName);
       
       if (!topicConsumerData) {
         return [];
       }
 
-      const lagData = topicOffsets.map(topicPartition => {
+      const lagData = topicOffsets.map((topicPartition: any) => {
         const consumerPartition = topicConsumerData.partitions.find(
-          p => p.partition === topicPartition.partition
+          (p: any) => p.partition === topicPartition.partition
         );
 
         const consumerOffset = consumerPartition ? parseInt(consumerPartition.offset) : 0;
@@ -288,7 +287,7 @@ export class DescribeAdmin {
       logger.info('Consumer lag calculated', {
         groupId,
         topic: topicName,
-        totalLag: lagData.reduce((sum, p) => sum + p.lag, 0)
+        totalLag: lagData.reduce((sum: number, p: any) => sum + p.lag, 0)
       });
 
       return lagData;
@@ -325,7 +324,10 @@ export class DescribeAdmin {
         }
       }
 
-      const configs = await this.admin.describeConfigs({ resources });
+      const configs = await this.admin.describeConfigs({ 
+        resources,
+        includeSynonyms: false 
+      });
 
       logger.info('Broker configurations retrieved', {
         brokerCount: configs.resources.length
@@ -338,7 +340,7 @@ export class DescribeAdmin {
           value: entry.configValue,
           source: entry.configSource,
           isSensitive: entry.isSensitive,
-          isReadOnly: entry.isReadOnly
+          isReadOnly: entry.readOnly
         }))
       }));
     } catch (error) {
@@ -446,7 +448,7 @@ export class DescribeAdmin {
       return {
         status: 'unhealthy',
         issues: ['Failed to connect to cluster'],
-        error: error.message
+        error: error instanceof Error ? error.message : String(error)
       };
     }
   }

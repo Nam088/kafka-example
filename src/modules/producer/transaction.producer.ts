@@ -256,7 +256,9 @@ export class TransactionProducer {
       throw new Error('Simulated transaction failure');
 
     } catch (error) {
-      logger.info('Expected error occurred, aborting transaction', { error: error.message });
+      logger.info('Expected error occurred, aborting transaction', { 
+        error: error instanceof Error ? error.message : String(error) 
+      });
       await transaction.abort();
       logger.info('Transaction aborted - no messages should be committed');
     }

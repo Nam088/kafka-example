@@ -117,7 +117,7 @@ export class MetricsCollector {
           nodeId: broker.nodeId,
           host: broker.host,
           port: broker.port,
-          rack: broker.rack
+          rack: (broker as any).rack
         }))
       };
 
@@ -147,7 +147,7 @@ export class MetricsCollector {
           const metadata = await admin.fetchTopicMetadata({ topics: [topicName] });
           
           const topic = metadata.topics[0];
-          const totalMessages = offsets.reduce((sum, partition) => {
+          const totalMessages = offsets.reduce((sum: number, partition: any) => {
             return sum + (parseInt(partition.high) - parseInt(partition.low));
           }, 0);
 
@@ -156,7 +156,7 @@ export class MetricsCollector {
             name: topicName,
             partitionCount: topic?.partitions.length || 0,
             totalMessages,
-            partitions: offsets.map(offset => ({
+            partitions: offsets.map((offset: any) => ({
               partition: offset.partition,
               earliestOffset: parseInt(offset.low),
               latestOffset: parseInt(offset.high),
@@ -167,7 +167,7 @@ export class MetricsCollector {
         } catch (error) {
           logger.debug('Failed to collect metrics for topic', { 
             topic: topicName, 
-            error: error.message 
+            error: error instanceof Error ? error.message : String(error) 
           });
         }
       }
@@ -340,20 +340,20 @@ export class MetricsCollector {
       },
       producers: {
         count: allMetrics.producers.length,
-        totalMessages: allMetrics.producers.reduce((sum, p) => sum + p.totalMessages, 0),
-        totalErrors: allMetrics.producers.reduce((sum, p) => sum + p.totalErrors, 0)
+        totalMessages: allMetrics.producers.reduce((sum: number, p: any) => sum + p.totalMessages, 0),
+        totalErrors: allMetrics.producers.reduce((sum: number, p: any) => sum + p.totalErrors, 0)
       },
       consumers: {
         count: allMetrics.consumers.length,
-        totalMessages: allMetrics.consumers.reduce((sum, c) => sum + c.totalMessages, 0),
-        totalErrors: allMetrics.consumers.reduce((sum, c) => sum + c.totalErrors, 0),
+        totalMessages: allMetrics.consumers.reduce((sum: number, c: any) => sum + c.totalMessages, 0),
+        totalErrors: allMetrics.consumers.reduce((sum: number, c: any) => sum + c.totalErrors, 0),
         avgProcessingTime: allMetrics.consumers.length > 0 
-          ? allMetrics.consumers.reduce((sum, c) => sum + c.avgProcessingTimeMs, 0) / allMetrics.consumers.length
+          ? allMetrics.consumers.reduce((sum: number, c: any) => sum + c.avgProcessingTimeMs, 0) / allMetrics.consumers.length
           : 0
       },
       topics: {
         count: allMetrics.topics.length,
-        totalMessages: allMetrics.topics.reduce((sum, t) => sum + t.totalMessages, 0)
+        totalMessages: allMetrics.topics.reduce((sum: number, t: any) => sum + t.totalMessages, 0)
       },
       system: allMetrics.system,
       timestamp: Date.now()

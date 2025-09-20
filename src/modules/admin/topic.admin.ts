@@ -56,9 +56,11 @@ export class TopicAdmin {
         topic: topicConfig.name,
         numPartitions: topicConfig.partitions || 1,
         replicationFactor: topicConfig.replicationFactor || 1,
-        configEntries: topicConfig.configs ? Object.entries(topicConfig.configs).map(
-          ([key, value]) => ({ name: key, value })
-        ) : undefined
+        ...(topicConfig.configs && {
+          configEntries: Object.entries(topicConfig.configs).map(
+            ([key, value]) => ({ name: key, value })
+          )
+        })
       };
 
       await this.admin.createTopics({
@@ -91,9 +93,11 @@ export class TopicAdmin {
         topic: config.name,
         numPartitions: config.partitions || 1,
         replicationFactor: config.replicationFactor || 1,
-        configEntries: config.configs ? Object.entries(config.configs).map(
-          ([key, value]) => ({ name: key, value })
-        ) : undefined
+        ...(config.configs && {
+          configEntries: Object.entries(config.configs).map(
+            ([key, value]) => ({ name: key, value })
+          )
+        })
       }));
 
       await this.admin.createTopics({
@@ -254,6 +258,7 @@ export class TopicAdmin {
 
     try {
       await this.admin.alterConfigs({
+        validateOnly: false,
         resources: [
           {
             type: 2, // TOPIC
@@ -294,7 +299,8 @@ export class TopicAdmin {
             type: 2, // TOPIC
             name: topicName
           }
-        ]
+        ],
+        includeSynonyms: false
       });
 
       logger.info('Topic configuration retrieved', { 
